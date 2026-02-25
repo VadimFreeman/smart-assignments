@@ -29,14 +29,11 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      const { data: assignment, error } = await supabase
-        .from("assignments")
-        .select("*")
-        .eq("access_code", accessCode.toUpperCase().trim())
-        .eq("is_active", true)
-        .single();
+      const { data, error } = await supabase.functions.invoke("get-assignment", {
+        body: { access_code: accessCode.toUpperCase().trim() },
+      });
 
-      if (error || !assignment) {
+      if (error || !data || data.error) {
         toast({
           title: "Ошибка",
           description: "Задание с таким кодом не найдено",
@@ -47,7 +44,7 @@ const Index = () => {
 
       // Store student info in sessionStorage for the assignment page
       sessionStorage.setItem("studentName", studentName.trim());
-      navigate(`/assignment/${assignment.id}`);
+      navigate(`/assignment/${data.id}`);
     } catch (error) {
       toast({
         title: "Ошибка",

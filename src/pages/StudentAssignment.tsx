@@ -59,14 +59,11 @@ const StudentAssignment = () => {
 
   const fetchAssignment = async () => {
     try {
-      const { data, error } = await supabase
-        .from("assignments")
-        .select("*")
-        .eq("id", id)
-        .eq("is_active", true)
-        .single();
+      const { data, error } = await supabase.functions.invoke("get-assignment", {
+        body: { assignment_id: id },
+      });
 
-      if (error || !data) {
+      if (error || !data || data.error) {
         toast({
           title: "Ошибка",
           description: "Задание не найдено или недоступно",
@@ -76,10 +73,7 @@ const StudentAssignment = () => {
         return;
       }
 
-      setAssignment({
-        ...data,
-        questions: data.questions as unknown as Question[],
-      });
+      setAssignment(data as Assignment);
     } catch (error) {
       toast({
         title: "Ошибка",
@@ -94,24 +88,6 @@ const StudentAssignment = () => {
 
   const handleAnswerChange = (questionId: string, answer: string) => {
     setAnswers({ ...answers, [questionId]: answer });
-  };
-
-  const calculateScore = () => {
-    if (!assignment || assignment.type !== "test") return null;
-
-    let correct = 0;
-    const questions = assignment.questions as TestQuestion[];
-    
-    for (const question of questions) {
-      const selectedOptionId = answers[question.id];
-      const correctOption = question.options.find(o => o.isCorrect);
-      
-      if (selectedOptionId && correctOption && selectedOptionId === correctOption.id) {
-        correct++;
-      }
-    }
-
-    return { correct, total: questions.length };
   };
 
   const handleSubmit = async () => {
@@ -131,26 +107,34 @@ const StudentAssignment = () => {
     setIsSubmitting(true);
 
     try {
-      const scoreResult = calculateScore();
-      
       const answersData = assignment.questions.map(q => ({
         questionId: q.id,
         answer: answers[q.id],
       }));
 
-      const { error } = await supabase
-        .from("student_responses")
-        .insert({
+      const { data, error } = await supabase.functions.invoke("submit-response", {
+        body: {
           assignment_id: assignment.id,
           student_name: studentName,
           answers: answersData,
-          score: scoreResult?.correct ?? null,
-          max_score: scoreResult?.total ?? null,
+        },
+      });
+
+      if (error || !data || data.error) {
+        const message = data?.error === "You have already submitted a response for this assignment"
+          ? "Вы уже отправили ответ на это задание"
+          : "Не удалось отправить ответ";
+        toast({
+          title: "Ошибка",
+          description: message,
+          variant: "destructive",
         });
+        return;
+      }
 
-      if (error) throw error;
-
-      setScore(scoreResult);
+      if (data.score !== null && data.max_score !== null) {
+        setScore({ correct: data.score, total: data.max_score });
+      }
       setIsSubmitted(true);
       
       toast({
