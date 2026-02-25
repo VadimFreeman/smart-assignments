@@ -57,7 +57,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen geo-bg flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -72,46 +72,49 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Student Access Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        {/* Student Access Form - Liquid Glass Card */}
+        <div className="liquid-glass-card p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
               <GraduationCap className="h-5 w-5" />
               Вход для учеников
-            </CardTitle>
-            <CardDescription>
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
               Введите код задания от учителя
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleStudentAccess} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="accessCode">Код задания</Label>
-                <Input
-                  id="accessCode"
-                  placeholder="Например: ABC123"
-                  value={accessCode}
-                  onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                  maxLength={6}
-                  className="text-center text-lg tracking-widest uppercase"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="studentName">Ваше имя</Label>
-                <Input
-                  id="studentName"
-                  placeholder="Введите ваше имя"
-                  value={studentName}
-                  onChange={(e) => setStudentName(e.target.value)}
-                  maxLength={100}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Загрузка..." : "Начать задание"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </p>
+          </div>
+          <form onSubmit={handleStudentAccess} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="accessCode">Код задания</Label>
+              <Input
+                id="accessCode"
+                placeholder="Например: ABC123"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                maxLength={6}
+                className="text-center text-lg tracking-widest uppercase bg-white/60 backdrop-blur-sm border-white/40"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="studentName">Ваше имя</Label>
+              <Input
+                id="studentName"
+                placeholder="Введите ваше имя"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                maxLength={100}
+                className="bg-white/60 backdrop-blur-sm border-white/40"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="liquid-glass-btn w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Загрузка..." : "Начать задание"}
+            </button>
+          </form>
+        </div>
 
         {/* Teacher Link */}
         <div className="text-center">
