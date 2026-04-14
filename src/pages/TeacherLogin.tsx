@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +21,6 @@ const TeacherLogin = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
 
   useEffect(() => {
-    // Check if already logged in
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         navigate("/teacher/dashboard");
@@ -41,25 +39,13 @@ const TeacherLogin = () => {
   const validateForm = (isSignup: boolean) => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
     
-    try {
-      emailSchema.parse(email);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        newErrors.email = e.errors[0].message;
-      }
+    try { emailSchema.parse(email); } catch (e) {
+      if (e instanceof z.ZodError) newErrors.email = e.errors[0].message;
     }
-    
-    try {
-      passwordSchema.parse(password);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        newErrors.password = e.errors[0].message;
-      }
+    try { passwordSchema.parse(password); } catch (e) {
+      if (e instanceof z.ZodError) newErrors.password = e.errors[0].message;
     }
-    
-    if (isSignup && !fullName.trim()) {
-      newErrors.fullName = "Введите ваше имя";
-    }
+    if (isSignup && !fullName.trim()) newErrors.fullName = "Введите ваше имя";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -67,227 +53,114 @@ const TeacherLogin = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm(false)) return;
-    
     setIsLoading(true);
-
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) {
-        toast({
-          title: "Ошибка входа",
-          description: error.message === "Invalid login credentials" 
-            ? "Неверный email или пароль" 
-            : error.message,
-          variant: "destructive",
-        });
+        toast({ title: "Ошибка входа", description: error.message === "Invalid login credentials" ? "Неверный email или пароль" : error.message, variant: "destructive" });
         return;
       }
-
-      toast({
-        title: "Успешно!",
-        description: "Вы вошли в систему",
-      });
+      toast({ title: "Успешно!", description: "Вы вошли в систему" });
       navigate("/teacher/dashboard");
-    } catch (error) {
-      toast({
-        title: "Ошибка",
-        description: "Произошла ошибка при входе",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    } catch {
+      toast({ title: "Ошибка", description: "Произошла ошибка при входе", variant: "destructive" });
+    } finally { setIsLoading(false); }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm(true)) return;
-    
     setIsLoading(true);
-
     try {
-      const redirectUrl = `${window.location.origin}/teacher/dashboard`;
-      
       const { error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName.trim(),
-          },
-        },
+        email: email.trim(), password,
+        options: { emailRedirectTo: `${window.location.origin}/teacher/dashboard`, data: { full_name: fullName.trim() } },
       });
-
       if (error) {
-        if (error.message.includes("already registered")) {
-          toast({
-            title: "Ошибка",
-            description: "Этот email уже зарегистрирован. Попробуйте войти.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Ошибка регистрации",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
+        toast({ title: "Ошибка регистрации", description: error.message.includes("already registered") ? "Этот email уже зарегистрирован. Попробуйте войти." : error.message, variant: "destructive" });
         return;
       }
-
-      toast({
-        title: "Регистрация успешна!",
-        description: "Проверьте вашу почту для подтверждения аккаунта",
-      });
-    } catch (error) {
-      toast({
-        title: "Ошибка",
-        description: "Произошла ошибка при регистрации",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+      toast({ title: "Регистрация успешна!", description: "Проверьте вашу почту для подтверждения аккаунта" });
+    } catch {
+      toast({ title: "Ошибка", description: "Произошла ошибка при регистрации", variant: "destructive" });
+    } finally { setIsLoading(false); }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          className="gap-2"
-          onClick={() => navigate("/")}
-        >
+        <Button variant="ghost" className="gap-2" onClick={() => navigate("/")}>
           <ArrowLeft className="h-4 w-4" />
           На главную
         </Button>
 
-        {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
           <div className="flex justify-center">
-            <BookOpen className="h-10 w-10 text-primary" />
+            <div className="w-14 h-14 rounded-full bg-primary/12 flex items-center justify-center">
+              <BookOpen className="h-7 w-7 text-primary" />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-medium tracking-tight text-foreground">
             Вход для учителей
           </h1>
         </div>
 
-        {/* Auth Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Авторизация</CardTitle>
-            <CardDescription>
-              Войдите или создайте аккаунт учителя
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Вход</TabsTrigger>
-                <TabsTrigger value="signup">Регистрация</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="teacher@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-destructive">{errors.email}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Пароль</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      placeholder="Введите пароль"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    {errors.password && (
-                      <p className="text-sm text-destructive">{errors.password}</p>
-                    )}
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Загрузка..." : "Войти"}
-                  </Button>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Ваше имя</Label>
-                    <Input
-                      id="signup-name"
-                      placeholder="Иван Иванов"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      maxLength={100}
-                    />
-                    {errors.fullName && (
-                      <p className="text-sm text-destructive">{errors.fullName}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="teacher@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-destructive">{errors.email}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Пароль</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="Минимум 6 символов"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    {errors.password && (
-                      <p className="text-sm text-destructive">{errors.password}</p>
-                    )}
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Загрузка..." : "Зарегистрироваться"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+        <div className="m3-card p-6">
+          <Tabs defaultValue="login">
+            <TabsList className="grid w-full grid-cols-2 rounded-full">
+              <TabsTrigger value="login" className="rounded-full">Вход</TabsTrigger>
+              <TabsTrigger value="signup" className="rounded-full">Регистрация</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <form onSubmit={handleLogin} className="space-y-4 pt-5">
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">Email</Label>
+                  <Input id="login-email" type="email" placeholder="teacher@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login-password">Пароль</Label>
+                  <Input id="login-password" type="password" placeholder="Введите пароль" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                </div>
+                <button type="submit" className="m3-filled-btn w-full" disabled={isLoading}>
+                  {isLoading ? "Загрузка..." : "Войти"}
+                </button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <form onSubmit={handleSignup} className="space-y-4 pt-5">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name">Ваше имя</Label>
+                  <Input id="signup-name" placeholder="Иван Иванов" value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={100} />
+                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input id="signup-email" type="email" placeholder="teacher@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Пароль</Label>
+                  <Input id="signup-password" type="password" placeholder="Минимум 6 символов" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                </div>
+                <button type="submit" className="m3-filled-btn w-full" disabled={isLoading}>
+                  {isLoading ? "Загрузка..." : "Зарегистрироваться"}
+                </button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-        {/* Test Account Info */}
-        <Card className="border-dashed">
-          <CardContent className="pt-4">
-            <p className="text-sm text-muted-foreground text-center">
-              Тестовый аккаунт: <span className="font-mono">admin@admin.com</span> / <span className="font-mono">admin</span>
-            </p>
-          </CardContent>
-        </Card>
+        <div className="m3-card p-4 border-dashed">
+          <p className="text-sm text-muted-foreground text-center">
+            Тестовый аккаунт: <span className="font-mono">admin@admin.com</span> / <span className="font-mono">admin</span>
+          </p>
+        </div>
       </div>
     </div>
   );
