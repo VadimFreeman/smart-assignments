@@ -21,6 +21,38 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate assignment_id is a UUID
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (typeof assignment_id !== "string" || !UUID_RE.test(assignment_id)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid assignment_id" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate answers is a bounded array of well-formed entries
+    if (!Array.isArray(answers) || answers.length === 0 || answers.length > 100) {
+      return new Response(
+        JSON.stringify({ error: "Invalid answers format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    for (const a of answers as any[]) {
+      if (
+        !a ||
+        typeof a.questionId !== "string" ||
+        a.questionId.length === 0 ||
+        a.questionId.length > 200 ||
+        typeof a.answer !== "string" ||
+        a.answer.length > 5000
+      ) {
+        return new Response(
+          JSON.stringify({ error: "Invalid answer entry" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const trimmedName = String(student_name).trim().slice(0, 100);
     if (trimmedName.length === 0) {
       return new Response(
