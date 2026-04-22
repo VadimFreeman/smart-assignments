@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { BookOpen, Plus, LogOut, Users, FileText, Copy, Eye, EyeOff } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
+import Loader from "@/components/Loader";
 
 interface Assignment {
   id: string;
@@ -83,7 +84,7 @@ const TeacherDashboard = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Загрузка...</p>
+        <Loader label="Загрузка..." />
       </div>
     );
   }
@@ -132,8 +133,12 @@ const TeacherDashboard = () => {
           </div>
         ) : (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {assignments.map((assignment) => (
-              <div key={assignment.id} className={`m3-card p-6 flex flex-col gap-4 ${!assignment.is_active ? "opacity-55" : ""}`}>
+            {assignments.map((assignment, idx) => (
+              <div
+                key={assignment.id}
+                className={`m3-card p-6 flex flex-col gap-4 m3-card-enter ${!assignment.is_active ? "opacity-55" : ""}`}
+                style={{ animationDelay: `${idx * 60}ms` }}
+              >
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1 min-w-0">
                     <h3 className="text-lg font-medium truncate">{assignment.title}</h3>

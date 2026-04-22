@@ -87,7 +87,7 @@ const ViewResponses = () => {
 
   if (isLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <p className="text-muted-foreground">Загрузка...</p>
+      <div className="m3-loader" />
     </div>
   );
 
