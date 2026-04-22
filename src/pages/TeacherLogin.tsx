@@ -160,11 +160,13 @@ const TeacherLogin = () => {
           </Tabs>
         </div>
 
-        <div className="m3-card p-4 border-dashed">
-          <p className="text-sm text-muted-foreground text-center">
-            Тестовый аккаунт: <span className="font-mono">admin@admin.com</span> / <span className="font-mono">admin</span>
-          </p>
-        </div>
+        {import.meta.env.DEV && (
+          <div className="m3-card p-4 border-dashed">
+            <p className="text-sm text-muted-foreground text-center">
+              Тестовый аккаунт: <span className="font-mono">admin@admin.com</span> / <span className="font-mono">admin</span>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
