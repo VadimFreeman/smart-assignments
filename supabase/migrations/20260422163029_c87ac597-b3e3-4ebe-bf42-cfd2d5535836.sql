@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can submit responses" ON public.student_responses;
