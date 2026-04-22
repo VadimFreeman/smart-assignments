@@ -126,7 +126,9 @@ const TeacherLogin = () => {
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 <button type="submit" className="m3-filled-btn w-full" disabled={isLoading}>
-                  {isLoading ? "Загрузка..." : "Войти"}
+                  {isLoading ? (
+                    <><span className="m3-loader m3-loader-sm" style={{ borderTopColor: "hsl(var(--primary-foreground))" }} />Загрузка...</>
+                  ) : "Войти"}
                 </button>
               </form>
             </TabsContent>
@@ -149,7 +151,9 @@ const TeacherLogin = () => {
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 <button type="submit" className="m3-filled-btn w-full" disabled={isLoading}>
-                  {isLoading ? "Загрузка..." : "Зарегистрироваться"}
+                  {isLoading ? (
+                    <><span className="m3-loader m3-loader-sm" style={{ borderTopColor: "hsl(var(--primary-foreground))" }} />Загрузка...</>
+                  ) : "Зарегистрироваться"}
                 </button>
               </form>
             </TabsContent>
