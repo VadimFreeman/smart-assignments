@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { BookOpen, CheckCircle, ArrowLeft } from "lucide-react";
+import Loader from "@/components/Loader";
 
 interface TestQuestion { id: string; text: string; options: { id: string; text: string; isCorrect: boolean }[]; }
 interface OpenQuestion { id: string; text: string; type: "open"; }
@@ -65,7 +66,7 @@ const StudentAssignment = () => {
 
   if (isLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <p className="text-muted-foreground">Загрузка задания...</p>
+      <Loader label="Загрузка задания..." />
     </div>
   );
 
@@ -120,7 +121,11 @@ const StudentAssignment = () => {
 
         <div className="space-y-5">
           {assignment.questions.map((question, index) => (
-            <div key={question.id} className="m3-card p-6">
+            <div
+              key={question.id}
+              className="m3-card p-6 m3-card-enter"
+              style={{ animationDelay: `${index * 80}ms` }}
+            >
               <h3 className="text-base font-medium mb-1">Вопрос {index + 1}</h3>
               <p className="text-foreground mb-4">{question.text}</p>
               {assignment.type === "test" && "options" in question ? (
